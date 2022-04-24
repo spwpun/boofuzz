@@ -52,6 +52,8 @@ from .primitives import (
     Static,
     String,
     Word,
+    # added by @spwpun
+    SingleBit,
 )
 from .repeater import CountRepeater, Repeater, TimeRepeater
 from .sessions import open_test_run, Session, Target
@@ -185,6 +187,9 @@ __all__ = [
     "UDPSocketConnection",
     "UnixSocketConnection",
     "Word",
+    # added by @spwpun
+    "SingleBit",
+    "s_single_bit",
 ]
 
 __version__ = "0.4.1"
@@ -892,6 +897,34 @@ def s_bit_field(
         )
     )
 
+def s_single_bit(
+    value, width, endian=LITTLE_ENDIAN, full_range=False, fuzzable=True, name=None, follow=True,field_type=None
+):
+    """
+    Push a variable length bit field onto the current block stack.
+
+    :see: Aliases: s_bit(), s_bits()
+
+    :type  value:          int
+    :param value:          Default integer value
+    :type  width:          int
+    :param width:          Width of bit fields
+    :type  endian:         Character
+    :param endian:         (Optional, def=LITTLE_ENDIAN) Endianess of the bit field (LITTLE_ENDIAN: <, BIG_ENDIAN: >)
+    :type  output_format:  str
+    :param output_format:  (Optional, def=binary) Output format, "binary" or "ascii"
+    :type  signed:         bool
+    :param signed:         (Optional, def=False) Make size signed vs. unsigned (applicable only with format="ascii")
+    :type  full_range:     bool
+    :param full_range:     (Optional, def=False) If enabled the field mutates through *all* possible values.
+    :type  fuzzable:       bool
+    :param fuzzable:       (Optional, def=True) Enable/disable fuzzing of this primitive
+    :type  name:           str
+    :param name:           (Optional, def=None) Specifying a name gives you direct access to a primitive
+    """
+
+    single_bit = primitives.SingleBit(value, blocks.CURRENT, width, None, endian, full_range, fuzzable, name, follow, field_type)
+    blocks.CURRENT.push(single_bit)
 
 def s_byte(
     value=0,

@@ -15,6 +15,7 @@ from .simple import Simple
 from .static import Static
 from .string import String
 from .word import Word
+from .single_bit import SingleBit
 
 __all__ = [
     "BasePrimitive",
@@ -33,4 +34,5 @@ __all__ = [
     "Static",
     "String",
     "Word",
+    "SingleBit",
 ]

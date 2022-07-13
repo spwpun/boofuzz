@@ -6,8 +6,9 @@ from .checksum import Checksum
 from .repeat import Repeat
 from .request import Request
 from .size import Size
+from .rrrepeat import RRRepeat
 
-__all__ = ["Block", "Checksum", "Repeat", "Request", "Size", "REQUESTS", "Aligned"]
+__all__ = ["Block", "Checksum", "Repeat", "Request", "Size", "REQUESTS", "Aligned", "RRRepeat"]
 
 REQUESTS = {}
 CURRENT = None

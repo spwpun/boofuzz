@@ -3,7 +3,7 @@ import sys
 
 
 from . import blocks, exception, legos, primitives
-from .blocks import Aligned, Block, Checksum, Repeat, Request, REQUESTS, Size
+from .blocks import Aligned, Block, Checksum, Repeat, Request, REQUESTS, Size, RRRepeat
 from .cli import main_helper
 from .connections import (
     BaseSocketConnection,
@@ -190,6 +190,8 @@ __all__ = [
     # added by @spwpun
     "SingleBit",
     "s_single_bit",
+    "RRRepeat",
+    "s_rrrepeat",
 ]
 
 __version__ = "0.4.1"
@@ -490,6 +492,32 @@ def s_repeat(block_name=None, min_reps=0, max_reps=25, step=1, variable=None, fu
         )
     )
 
+def s_rrrepeat(block_name, min_reps=0, max_reps=None, step=1, fuzzable=True, name=None, counter=None):
+    """
+    Repeat the rendered contents of the specified block cycling from min_reps to max_reps counting by step. By
+    default renders to nothing. This block modifier is useful for fuzzing overflows in table entries. This block
+    modifier MUST come after the block it is being applied to.
+
+    :see: TODO: no support current
+
+    :type  block_name: str
+    :param block_name: Name of block to repeat
+    :type  min_reps:   int
+    :param min_reps:   (Optional, def=0) Minimum number of block repetitions
+    :type  max_reps:   int
+    :param max_reps:   (Optional, def=None) Maximum number of block repetitions
+    :type  step:       int
+    :param step:       (Optional, def=1) Step count between min and max reps
+    :type  variable:   Sulley Integer Primitive
+    :param variable:   (Optional, def=None) An integer primitive which will specify the number of repitions
+    :type  fuzzable:   bool
+    :param fuzzable:   (Optional, def=True) Enable/disable fuzzing of this primitive
+    :type  name:       str
+    :param name:       (Optional, def=None) Specifying a name gives you direct access to a primitive
+    """
+
+    rrrepeat = RRRepeat(block_name, blocks.CURRENT, min_reps, max_reps, step, fuzzable, name, counter)
+    blocks.CURRENT.push(rrrepeat)
 
 def s_size(
     block_name=None,

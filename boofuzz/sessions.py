@@ -1076,7 +1076,8 @@ class Session(pgraph.Graph):
                 # spawn the web interface.
                 self.web_interface_thread.start()
 
-    def _callback_current_node(self, node, edge, test_case_context):
+    # Spwpun: added mutationcontext argument
+    def _callback_current_node(self, node, edge, test_case_context, mutation_context):
         """Execute callback preceding current node.
 
         Args:
@@ -1099,6 +1100,7 @@ class Session(pgraph.Graph):
                 node=node,
                 edge=edge,
                 test_case_context=test_case_context,
+                mutation_context=mutation_context,
             )
 
         return data
@@ -1660,7 +1662,7 @@ class Session(pgraph.Graph):
                 )
                 mutation_context.protocol_session = protocol_session
                 self._fuzz_data_logger.open_test_step("Prep Node '{0}'".format(node.name))
-                callback_data = self._callback_current_node(node=node, edge=e, test_case_context=protocol_session)
+                callback_data = self._callback_current_node(node=node, edge=e, test_case_context=protocol_session, mutation_context=mutation_context)
                 self.transmit_normal(target, node, e, callback_data=callback_data, mutation_context=mutation_context)
 
             prev_node = self.nodes[mutation_context.message_path[-1].src]
@@ -1671,7 +1673,8 @@ class Session(pgraph.Graph):
             )
             mutation_context.protocol_session = protocol_session
             callback_data = self._callback_current_node(
-                node=self.fuzz_node, edge=mutation_context.message_path[-1], test_case_context=protocol_session
+                node=self.fuzz_node, edge=mutation_context.message_path[-1], test_case_context=protocol_session,
+                mutation_context=mutation_context
             )
 
             self._fuzz_data_logger.open_test_step("Node Under Test '{0}'".format(self.fuzz_node.name))
@@ -1754,7 +1757,8 @@ class Session(pgraph.Graph):
                     current_message=node,
                 )
                 mutation_context.protocol_session = protocol_session
-                callback_data = self._callback_current_node(node=node, edge=e, test_case_context=protocol_session)
+                # Spwpun: added mutation_context to the _callback_current_node, so that the callback can use it
+                callback_data = self._callback_current_node(node=node, edge=e, test_case_context=protocol_session, mutation_context=mutation_context)
                 self._fuzz_data_logger.open_test_step("Transmit Prep Node '{0}'".format(node.name))
                 self.transmit_normal(target, node, e, callback_data=callback_data, mutation_context=mutation_context)
 
@@ -1766,7 +1770,8 @@ class Session(pgraph.Graph):
             )
             mutation_context.protocol_session = protocol_session
             callback_data = self._callback_current_node(
-                node=self.fuzz_node, edge=mutation_context.message_path[-1], test_case_context=protocol_session
+                node=self.fuzz_node, edge=mutation_context.message_path[-1], test_case_context=protocol_session,
+                mutation_context=mutation_context
             )
             self._fuzz_data_logger.open_test_step("Fuzzing Node '{0}'".format(self.fuzz_node.name))
             self.transmit_fuzz(

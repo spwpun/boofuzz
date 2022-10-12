@@ -52,8 +52,8 @@ class RRRepeat(fuzzable.Fuzzable):
         self.current_reps = min_reps  # current number of repetitions
 
         # ensure the target block exists.
-        print(self.request.names)
         if self.block_name not in self.request.names:
+            print("[Error] Current request names: \n", self.request.names)
             raise exception.SullyRuntimeError("Can't add repeater for non-existent block: %s!" % self.block_name)
 
         # ensure the user specified either a variable to tie this repeater to or a min/max val.

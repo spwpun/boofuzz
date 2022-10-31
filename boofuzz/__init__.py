@@ -492,7 +492,7 @@ def s_repeat(block_name=None, min_reps=0, max_reps=25, step=1, variable=None, fu
         )
     )
 
-def s_rrrepeat(block_name, min_reps=0, max_reps=None, step=1, fuzzable=True, name=None, counter=None):
+def s_rrrepeat(block_name=None, min_reps=0, max_reps=25, step=1, variable=None, fuzzable=True, name=None):
     """
     Repeat the rendered contents of the specified block cycling from min_reps to max_reps counting by step. By
     default renders to nothing. This block modifier is useful for fuzzing overflows in table entries. This block
@@ -516,7 +516,15 @@ def s_rrrepeat(block_name, min_reps=0, max_reps=None, step=1, fuzzable=True, nam
     :param name:       (Optional, def=None) Specifying a name gives you direct access to a primitive
     """
 
-    rrrepeat = RRRepeat(block_name, blocks.CURRENT, min_reps, max_reps, step, fuzzable, name, counter)
+    rrrepeat = RRRepeat(
+            name=name,
+            block_name=block_name,
+            request=blocks.CURRENT,
+            min_reps=min_reps,
+            max_reps=max_reps,
+            step=step,
+            variable=variable,
+            fuzzable=fuzzable,)
     blocks.CURRENT.push(rrrepeat)
 
 def s_size(

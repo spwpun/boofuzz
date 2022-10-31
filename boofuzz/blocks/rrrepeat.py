@@ -2,37 +2,55 @@ import random
 
 from .. import exception, helpers, fuzzable
 from ..primitives.bit_field import BitField
+from ..protocol_session_reference import ProtocolSessionReference
 
 
 class RRRepeat(fuzzable.Fuzzable):
     """
     This block type is kind of special in that it is a hybrid between a block and a primitive (it can be fuzzed). The
     user does not need to be wary of this fact.
+    Repeat the rendered contents of the specified block cycling from min_reps to max_reps counting by step. By
+    default renders to nothing. This block modifier is useful for fuzzing overflows in table entries. This block
+    modifier MUST come after the block it is being applied to.
+
+    @type  block_name: str
+    @param block_name: Name of block to repeat
+    @type  request:    s_request
+    @param request:    Request this block belongs to
+    @type  min_reps:   int
+    @param min_reps:   (Optional, def=0) Minimum number of block repetitions
+    @type  max_reps:   int
+    @param max_reps:   (Optional, def=None) Maximum number of block repetitions
+    @type  step:       int
+    @param step:       (Optional, def=1) Step count between min and max reps
+    @type  fuzzable:   bool
+    @param fuzzable:   (Optional, def=True) Enable/disable fuzzing of this primitive
+    @type  name:       str
+    @param name:       (Optional, def=None) Specifying a name gives you direct access to a primitive
     """
 
     ancount_orig = 0
 
-    def __init__(self, block_name, request, min_reps=0, max_reps=25, step=1, fuzzable=True, name=None, counter=None):
-        """
-        Repeat the rendered contents of the specified block cycling from min_reps to max_reps counting by step. By
-        default renders to nothing. This block modifier is useful for fuzzing overflows in table entries. This block
-        modifier MUST come after the block it is being applied to.
+    def __init__(
+        self,
+        name=None,
+        block_name=None,
+        request=None,
+        min_reps=0,
+        max_reps=25,
+        step=1,
+        variable=None,
+        default_value=None,
+        *args,
+        **kwargs
+        ):
+        if default_value is None:
+            if variable is not None:
+                default_value = ProtocolSessionReference(name=variable, default_value=0)
+            else:
+                default_value = 0
 
-        @type  block_name: str
-        @param block_name: Name of block to repeat
-        @type  request:    s_request
-        @param request:    Request this block belongs to
-        @type  min_reps:   int
-        @param min_reps:   (Optional, def=0) Minimum number of block repetitions
-        @type  max_reps:   int
-        @param max_reps:   (Optional, def=None) Maximum number of block repetitions
-        @type  step:       int
-        @param step:       (Optional, def=1) Step count between min and max reps
-        @type  fuzzable:   bool
-        @param fuzzable:   (Optional, def=True) Enable/disable fuzzing of this primitive
-        @type  name:       str
-        @param name:       (Optional, def=None) Specifying a name gives you direct access to a primitive
-        """
+        super(RRRepeat, self).__init__(name=name, default_value=default_value, *args, **kwargs)
 
         self.block_name = block_name
         self.request = request
@@ -41,28 +59,18 @@ class RRRepeat(fuzzable.Fuzzable):
         self.step = step
         self._fuzzable = fuzzable
         self._name = name
-        self._counter = counter
+        self._counter = variable
 
         self._value = b""
-        self._original_value = b""  # default to nothing!
-        self._rendered = b""  # rendered value
-        self._fuzz_complete = False  # flag if this primitive has been completely fuzzed
-        self._fuzz_library = []  # library of static fuzz heuristics to cycle through.
-        self._mutant_index = 0  # current mutation number
-        self.current_reps = min_reps  # current number of repetitions
+        self._original_value = b"test_for_rrrepeat"      # default to nothing!
+        self._rendered = b""            # rendered value
+        self._fuzz_complete = False     # flag if this primitive has been completely fuzzed
+        self._fuzz_library = []         # library of static fuzz heuristics to cycle through.
+        self._mutant_index = 0          # current mutation number
+        self.current_reps = min_reps    # current number of repetitions
 
-        # ensure the target block exists.
-        if self.block_name not in self.request.names:
-            print("[Error] Current request names: \n", self.request.names)
-            raise exception.SullyRuntimeError("Can't add repeater for non-existent block: %s!" % self.block_name)
-
-        # ensure the user specified either a variable to tie this repeater to or a min/max val.
-        if self.max_reps is None:
-            raise exception.SullyRuntimeError(
-                "Repeater for block %s doesn't have a min/max or variable binding!" % self.block_name
-            )
-
-        self._fuzz_library = list(range(self.min_reps, self.max_reps + 1, self.step))
+        if self.max_reps is not None and self.request is not None and self.block_name is not None:
+            self._fuzz_library = list(range(self.min_reps, self.max_reps + 1, self.step))
 
     @property
     def name(self):
@@ -76,9 +84,9 @@ class RRRepeat(fuzzable.Fuzzable):
     def fuzzable(self):
         return self._fuzzable
 
-    @property
-    def original_value(self):
-        return self._original_value
+    # @property
+    # def original_value(self):
+    #     return self._original_value
 
     def mutate(self):
         """
@@ -163,7 +171,7 @@ class RRRepeat(fuzzable.Fuzzable):
 
         return True
 
-    def num_mutations(self):
+    def num_mutations(self, default_value):
         """
         Determine the number of repetitions we will be making.
 

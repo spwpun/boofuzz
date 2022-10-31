@@ -46,13 +46,14 @@ class FuzzableBlock(Fuzzable):
                 yield mutation
 
     def num_mutations(self, default_value=None):
-        num_mutations = 0
+        num_of_mutations = 0
 
         for item in self.stack:
             if item.fuzzable:
-                num_mutations += item.get_num_mutations()
+                print("item name: %s" % item.name)
+                num_of_mutations += item.get_num_mutations()
 
-        return num_mutations
+        return num_of_mutations
 
     def get_child_data(self, mutation_context):
         """Get child or referenced data for this node.

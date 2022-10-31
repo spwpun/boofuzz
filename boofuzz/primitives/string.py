@@ -285,7 +285,6 @@ class String(Fuzzable):
         # TODO: Add easy and sane string injection from external file/s
 
     def encode(self, value, mutation_context=None):
-        import pdb;pdb.set_trace()
         try:
             value = value.encode(self.encoding, "replace")
         except AttributeError:

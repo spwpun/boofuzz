@@ -156,7 +156,7 @@ class Size(Fuzzable):
         """Return length of target block, including mutations if it is currently mutated."""
         if self.request is not None and self.block_name is not None:
             target_block = self.request.resolve_name(self.context_path, self.block_name)
-            length = len(target_block.original_value)
+            length = len(target_block._original_value)
             return length
         else:
             return 0

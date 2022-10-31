@@ -103,7 +103,7 @@ class RRRepeat(fuzzable.Fuzzable):
 
         # if fuzzing was disabled or complete, and mutate() is called, ensure the original value is restored.
         if not self.fuzzable or self._fuzz_complete:
-            self._value = self.original_value
+            self._value = self._original_value
             self.current_reps = self.min_reps
 
             if self._counter:
@@ -193,7 +193,7 @@ class RRRepeat(fuzzable.Fuzzable):
         """
         self._fuzz_complete = False
         self._mutant_index = 0
-        self._value = self.original_value
+        self._value = self._original_value
 
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, self._name)

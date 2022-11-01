@@ -153,7 +153,7 @@ class Fuzzable:
         return self.encode(value=self.get_value(mutation_context=mutation_context), mutation_context=mutation_context)
 
     def get_num_mutations(self):
-        print("[Log] Current Fuzzable block: %s" % self.name)
+        # print("[Log] Current Fuzzable block: %s" % self.name) # debug
         return self.num_mutations(default_value=self.original_value(test_case_context=None)) + len(self._fuzz_values)
 
     def get_value(self, mutation_context=None):

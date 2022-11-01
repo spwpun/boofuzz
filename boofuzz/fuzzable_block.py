@@ -50,7 +50,7 @@ class FuzzableBlock(Fuzzable):
 
         for item in self.stack:
             if item.fuzzable:
-                print("item name: %s" % item.name)
+                # print("item name: %s" % item.name)
                 num_of_mutations += item.get_num_mutations()
 
         return num_of_mutations

@@ -181,7 +181,7 @@ class RRRepeat(fuzzable.Fuzzable):
 
         return len(self._fuzz_library) * 6
 
-    def render(self):
+    def render(self, mutation_context=None):
         """
         Nothing fancy on render, simply return the value.
         """
@@ -193,7 +193,19 @@ class RRRepeat(fuzzable.Fuzzable):
         # self._rendered = self._value
         # return helpers.str_to_bytes(self._rendered)
         # direct use the parent method
-        return super(fuzzable.Fuzzable, self).render()
+        return super(RRRepeat, self).render(mutation_context)
+    
+    def encode(self, value, mutation_context):
+        return value * self._get_child_data(mutation_context=mutation_context)
+
+    def _get_child_data(self, mutation_context):
+        if self.request is not None and self.block_name is not None:
+            _rendered = self.request.resolve_name(self.context_path, self.block_name).render(
+                mutation_context=mutation_context
+            )
+        else:
+            _rendered = ""
+        return helpers.str_to_bytes(_rendered)
 
     def reset(self):
         """

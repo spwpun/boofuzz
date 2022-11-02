@@ -1,6 +1,8 @@
 import functools
 import sys
 
+from requests import request
+
 
 from . import blocks, exception, legos, primitives
 from .blocks import Aligned, Block, Checksum, Repeat, Request, REQUESTS, Size, RRRepeat
@@ -493,7 +495,7 @@ def s_repeat(block_name=None, min_reps=0, max_reps=25, step=1, variable=None, fu
     )
 
 def s_rrrepeat(block_name=None, min_reps=0, max_reps=25, step=1, variable=None, fuzzable=True, name=None):
-    """
+    """ 
     Repeat the rendered contents of the specified block cycling from min_reps to max_reps counting by step. By
     default renders to nothing. This block modifier is useful for fuzzing overflows in table entries. This block
     modifier MUST come after the block it is being applied to.
@@ -771,7 +773,7 @@ def s_mirror(primitive_name=None, name=None):
     blocks.CURRENT.push(Mirror(name=name, primitive_name=primitive_name, request=blocks.CURRENT))
 
 
-def s_string(value="", size=None, padding=b"\x00", encoding="ascii", fuzzable=True, max_len=None, name=None):
+def s_string(value="", size=None, padding=b"\x00", encoding="ascii", fuzzable=True, max_len=None, name=None, field_type=None, relative=None):
     """
     Push a string onto the current block stack.
 
@@ -805,6 +807,9 @@ def s_string(value="", size=None, padding=b"\x00", encoding="ascii", fuzzable=Tr
             encoding=encoding,
             max_len=max_len,
             fuzzable=fuzzable,
+            field_type=field_type,
+            relative=relative,
+            current_block=blocks.CURRENT,
         )
     )
 

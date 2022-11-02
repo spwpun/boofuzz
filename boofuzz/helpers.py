@@ -447,6 +447,27 @@ def str_to_bytes(value, encoding="utf-8", errors="replace"):
         return value
     return value.encode(encoding, errors)
 
+def dnsname_to_wire(dnsname):
+    """Convert a DNS name to wire format.
+
+    Args:
+        dnsname (str): DNS name.
+
+    Returns:
+        bytes: DNS name in wire format.
+    """
+    if dnsname == ".":
+        return b"\x00"
+
+    wire = b""
+    for label in dnsname.split("."):
+        if len(label) == 0:
+            continue
+        wire += struct.pack("!B", len(label))
+        wire += label.encode("ascii")
+    wire += b"\x00"
+    return wire
+
 
 def parse_target(target_name):
     try:

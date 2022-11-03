@@ -239,7 +239,6 @@ class String(Fuzzable):
         Add a general dnsname to the fuzz_dnsnames list
         '''
         try:
-            print(self.encoding, type(self.encoding))
             self._default_value = bytes(self._default_value, self.encoding)
         except AttributeError:
             pass

@@ -1,6 +1,12 @@
 import itertools
 import math
 import random
+import string
+import dns.name
+import dns.rdtypes.ANY.TXT
+import dns.rdatatype
+import dns.rdataclass
+from .. import helpers
 
 from ..fuzzable import Fuzzable
 
@@ -181,8 +187,16 @@ class String(Fuzzable):
 
     _variable_mutation_multipliers = [2, 10, 100]
 
+    _fuzz_dnsnames = []
+    _fuzz_dnsnames_library = []
+
+    _fuzz_chars = []
+    _fuzz_chars_library = []
+
     def __init__(
-        self, name=None, default_value="", size=None, padding=b"\x00", encoding="utf-8", max_len=None, *args, **kwargs
+        self, name=None, default_value="", size=None, padding=b"\x00", encoding="utf-8", max_len=None, 
+        field_type=None, relative=None, current_block=None,
+        *args, **kwargs
     ):
         super(String, self).__init__(name=name, default_value=default_value, *args, **kwargs)
 
@@ -192,6 +206,9 @@ class String(Fuzzable):
             self.max_len = self.size
         self.encoding = encoding
         self.padding = padding
+        self.field_type = field_type
+        self.relative = relative
+        self.current_block = current_block
         if isinstance(padding, str):
             self.padding = self.padding.encode(self.encoding)
         self._static_num_mutations = None
@@ -206,6 +223,92 @@ class String(Fuzzable):
                 range(previous_length, length), local_random.randint(1, self._long_string_lengths[0])
             )
             previous_length = length
+        
+        # Add fuzz dns names to the fuzz library
+        if self.field_type == "DNSNAME":
+            self.add_fuzzdnsnames()
+            self.add_fuzzdnsnames_library()
+        
+        # Add fuzz chars to the fuzz library
+        if self.field_type == "CHARACTER":
+            self.add_fuzzchars()
+            self.add_fuzzchars_library()
+    
+    def add_fuzzdnsnames(self):
+        '''
+        Add a general dnsname to the fuzz_dnsnames list
+        '''
+        try:
+            self._default_value = bytes(self._default_value, self.encoding)
+        except AttributeError:
+            pass
+        except TypeError:
+            pass
+        self._fuzz_dnsnames.append(str(self._default_value, encoding="utf-8") + ".")
+        self._fuzz_dnsnames.append((str(self._default_value, encoding="utf-8") + ".") * 10)
+        self._fuzz_dnsnames.append((str(self._default_value, encoding="utf-8") + ".") * 100)
+        self._fuzz_dnsnames.append((str(self._default_value, encoding="utf-8") + ".") * 200)
+        self._fuzz_dnsnames.append((str(self._default_value, encoding="utf-8") + ".") * 400)
+
+        label_len = [6, 10, 20, 50, 58, 62]
+        salt = ''
+
+        for i in label_len:
+            if random.randint(0,100) % 3 == 1:
+                salt = "."
+            elif random.randint(0,100) % 3 == 2:
+                salt = ".."
+            else:
+                salt = ''.join(random.sample(string.ascii_letters*3 + string.digits*3, i))
+            salt += "."
+            #salt += ''.join(random.sample(string.ascii_letters + string.digits, random.randint(0,50)))
+            self._fuzz_dnsnames.append(salt)
+        self._fuzz_dnsnames.append(".test.com.")
+        self._fuzz_dnsnames.append("..test.com.")
+        self._fuzz_dnsnames.append("...test.com.")
+        self._fuzz_dnsnames.append("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA."*5)
+    
+    def add_fuzzdnsnames_library(self):
+        '''
+        Use dns.to_wire() to process the general names, add fuzz_dnsnames list to the fuzz_library
+        '''
+        for label in self._fuzz_dnsnames:
+            if len(label) < 20:
+                for num in [4, 32, 128, 312, 400, 412]:
+                    tmp_val = helpers.dnsname_to_wire(label*num)
+                    self._fuzz_dnsnames_library.append(tmp_val)
+            self._fuzz_dnsnames_library.append(helpers.dnsname_to_wire(label))
+
+        # add intesting value
+        test1 = b'\x3f\x00' + b'\x01'*62 + (b'\x3f' + b'\x01'*63)*14 + b'\x3f' + b'\x01'*63 + b'\x00'   # 0x40*16 = 0x400, + 1
+        test2 = (b'\x3f' + b'\x01'*63)*15 + b'\x3f' + b'\x01'*63 + b'\x00' # 0x400 + 1
+        self._fuzz_dnsnames_library.append(test1)
+        self._fuzz_dnsnames_library.append(test2)
+        self._fuzz_dnsnames_library.append(b'\x02\xc0\x01\x00\x01\x41\xc0\x01')
+
+        self._fuzz_library.extend(self._fuzz_dnsnames_library)
+    
+    def add_fuzzchars(self):
+        '''
+        Add general characters
+        '''
+        self._fuzz_chars.append(self._default_value)
+
+        self._fuzz_chars += ["IBM-PC UNIX", "IBM-pc unix", "Generic PC clone", "PC", "NetBSD-1.4", "NetBSD", "", " "]
+
+        for item in random.sample(self._fuzz_library, 20):
+            self._fuzz_chars.append(item)
+        
+
+    def add_fuzzchars_library(self):
+        '''
+        Add fuzz_chars list to the fuzz_library
+        '''
+        for info in self._fuzz_chars:
+            self._fuzz_chars_library.append(info)
+        
+        self._fuzz_library.extend(self._fuzz_chars_library)
+
 
     def _yield_long_strings(self, sequences):
         """
@@ -276,6 +379,9 @@ class String(Fuzzable):
             self._yield_variable_mutations(default_value),
             self._yield_long_strings(self.long_string_seeds),
         ):
+            # Each time will randomly change the relative block value
+            if self.relative:
+                self.current_block.names[self.relative].default_value = random.choice(self.current_block.names[self.relative]._fuzz_library)
             current_val = self._adjust_mutation_for_size(val)
             if last_val == current_val:
                 continue

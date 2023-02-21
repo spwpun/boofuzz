@@ -63,3 +63,6 @@ boofuzz-results/
 # Temporary Files
 *.swp
 .DS_Store
+
+# Development
+.vscode/

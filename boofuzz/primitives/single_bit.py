@@ -41,9 +41,9 @@ def int_to_binary_string(number, bit_width):
 class SingleBit(BasePrimitive):
     def __init__(
         self,
-        value,
         request,
         width,
+        default_value=0,
         max_num=None,
         endian=LITTLE_ENDIAN,
         full_range=False,
@@ -73,10 +73,10 @@ class SingleBit(BasePrimitive):
 
         super(SingleBit, self).__init__()
 
-        assert isinstance(value, (six.integer_types, list, tuple)), "value must be an integer, list, or tuple!"
+        assert isinstance(default_value, (six.integer_types, list, tuple)), "value must be an integer, list, or tuple!"
         assert isinstance(width, six.integer_types), "width must be an integer!"
 
-        self._value = self._original_value = value
+        self._value = self._original_value = default_value
         self.request = request
         self.width = width
         self.max_num = max_num
@@ -93,14 +93,14 @@ class SingleBit(BasePrimitive):
 
         assert isinstance(self.max_num, six.integer_types), "max_num must be an integer!"
 
-        if isinstance(value, (list, tuple)):
+        if isinstance(default_value, (list, tuple)):
             # Use the supplied values as the fuzz library.
-            for val in iter(value):
+            for val in iter(default_value):
                 if val < self.max_num:
                     self._fuzz_library.append(val)
 
             # Use the first value of the supplied values as the default value if it exists, 0 else.
-            val = 0 if len(value) == 0 else value[0]
+            val = 0 if len(default_value) == 0 else default_value[0]
             self._value = self._original_value = val
 
             # TODO: Add injectable arbitrary bit fields
@@ -134,7 +134,7 @@ class SingleBit(BasePrimitive):
         return True
 
 
-    def num_mutations(self):
+    def num_mutations(self, default_value):
         """
         Calculate and return the total number of mutations for this individual primitive.
 
@@ -144,11 +144,12 @@ class SingleBit(BasePrimitive):
         #return len(self._fuzz_library) + len(self._fuzz_int)
         return len(self._fuzz_library)
 
-    def _render(self, value):
+    def render(self, value=None, mutation_context=None):
 
         temp = ''
         temp_length = 0
 
+        # Make contious bit field, consider the bit field's bit length cannot divide by 8
         if self.follow:
             return b''
         else:
@@ -167,7 +168,7 @@ class SingleBit(BasePrimitive):
 
 
     def __len__(self):
-        return len(self._render(self._value))
+        return len(self.render(value = self._value))
         # if self.follow:
         #     return 0
         # else:

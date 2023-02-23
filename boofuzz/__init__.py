@@ -944,7 +944,7 @@ def s_single_bit(
     """
     Push a variable length bit field onto the current block stack.
 
-    :see: Aliases: s_bit(), s_bits()
+    :see: s_single_bit()
 
     :type  value:          int
     :param value:          Default integer value
@@ -952,19 +952,17 @@ def s_single_bit(
     :param width:          Width of bit fields
     :type  endian:         Character
     :param endian:         (Optional, def=LITTLE_ENDIAN) Endianess of the bit field (LITTLE_ENDIAN: <, BIG_ENDIAN: >)
-    :type  output_format:  str
-    :param output_format:  (Optional, def=binary) Output format, "binary" or "ascii"
-    :type  signed:         bool
-    :param signed:         (Optional, def=False) Make size signed vs. unsigned (applicable only with format="ascii")
     :type  full_range:     bool
     :param full_range:     (Optional, def=False) If enabled the field mutates through *all* possible values.
     :type  fuzzable:       bool
     :param fuzzable:       (Optional, def=True) Enable/disable fuzzing of this primitive
     :type  name:           str
     :param name:           (Optional, def=None) Specifying a name gives you direct access to a primitive
+    :type  follow:         bool
+    :param follow:         enable/disable following of this primitive, to construct non-divided-by-8 bit fields
     """
 
-    single_bit = primitives.SingleBit(value, blocks.CURRENT, width, None, endian, full_range, fuzzable, name, follow, field_type)
+    single_bit = primitives.SingleBit(blocks.CURRENT, width, value, None, endian, full_range, fuzzable, name, follow, field_type)
     blocks.CURRENT.push(single_bit)
 
 def s_byte(

@@ -1012,7 +1012,7 @@ def s_byte(
     )
 
 
-def s_bytes(value=b"", size=None, padding=b"\x00", fuzzable=True, max_len=None, name=None):
+def s_bytes(value=b"", size=None, padding=b"\x00", fuzzable=True, max_len=None, name=None, field_type=None):
     """
     Push a bytes field of arbitrary length onto the current block stack.
 
@@ -1031,7 +1031,7 @@ def s_bytes(value=b"", size=None, padding=b"\x00", fuzzable=True, max_len=None, 
     """
 
     blocks.CURRENT.push(
-        Bytes(name=name, default_value=value, size=size, padding=padding, max_len=max_len, fuzzable=fuzzable)
+        Bytes(name=name, default_value=value, size=size, padding=padding, max_len=max_len, fuzzable=fuzzable, field_type=field_type)
     )
 
 

@@ -35,7 +35,7 @@ class Fuzzable:
 
     name_counter = 0
 
-    def __init__(self, name=None, default_value=None, fuzzable=True, fuzz_values=None):
+    def __init__(self, name=None, default_value=None, fuzzable=True, fuzz_values=None, *args, **kwargs):
         self._fuzzable = fuzzable
         self._name = name
         self._default_value = default_value

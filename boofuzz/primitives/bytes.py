@@ -143,12 +143,25 @@ class Bytes(Fuzzable):
             self.max_len = self.size
         self.padding = padding
 
+        # Get the human readable field_type by **kwargs
+        self.field_type = kwargs["field_type"]
+
     def mutations(self, default_value):
+        # First yield interesting values if the field_type is more human readable
+        if self.field_type == "TIME":
+            yield from [b"00:00:00", b"23:59:59", b"12:34:56",
+                        b"00:00:00.000", b"23:59:59.999", b"12:34:56.789",
+                        b"0"*95 + b"." + b"1"*4 + b"A",
+                        b"0"*995 + b"." + b"1"*4 + b"Z",]
+        else:
+            pass
+
         for fuzz_value in self._iterate_fuzz_cases(default_value):
             if callable(fuzz_value):
                 yield compose(self._adjust_mutation_for_size, fuzz_value)
             else:
                 yield self._adjust_mutation_for_size(fuzz_value=fuzz_value)
+
 
     def _adjust_mutation_for_size(self, fuzz_value):
         if self.size is not None:

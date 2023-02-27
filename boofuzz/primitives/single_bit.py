@@ -155,13 +155,19 @@ class SingleBit(BasePrimitive):
         else:
             for item in self.request.walk():
                 if isinstance(item, SingleBit):
-                    if item.follow == True:
-                        temp += int_to_binary_string(item._value, item.width)
-                    else:
+                    if item.follow == False and item.name == self.name:
                         temp += int_to_binary_string(self._value, self.width)
+                        temp_length += self.width
+                        assert temp_length % 8 == 0, "The bit field's bit length(%d) cannot divide by 8!"%temp_length
                         break
-                    temp_length += item.width
-            temp_length += self.width
+                    else:
+                        # item.follow == True or ( item.follow == False and item.name != self.name)
+                        temp += int_to_binary_string(item._value, item.width)
+                        temp_length += item.width
+                        if temp_length % 8 == 0:
+                            # clear the temp
+                            temp = ''
+                            temp_length = 0
             return_temp = binary_string_to_int(temp)
             return return_temp.to_bytes(length=int(temp_length/8),byteorder='big',signed=False)
             #return six.int2bytes(return_temp)

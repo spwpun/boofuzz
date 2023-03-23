@@ -1743,6 +1743,10 @@ class Session(pgraph.Graph):
                     type(self.fuzz_node.mutant).__name__,
                 )
             )
+        
+        # log the default value and current value of the fuzz node
+        self._fuzz_data_logger.log_info("Default value: {0}".format(self.fuzz_node.mutant._default_value))
+        self._fuzz_data_logger.log_info("Current value: {0}".format(self.fuzz_node.mutant.render(mutation_context)))
 
         try:
             self._open_connection_keep_trying(target)

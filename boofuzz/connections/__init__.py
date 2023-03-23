@@ -6,6 +6,7 @@ from .itarget_connection import ITargetConnection
 from .netconf_connection import NETCONFConnection
 from .raw_l2_socket_connection import RawL2SocketConnection
 from .raw_l3_socket_connection import RawL3SocketConnection
+from .raw_l4_socket_connection import RawL4SocketConnection
 from .serial_connection import SerialConnection
 from .serial_connection_low_level import SerialConnectionLowLevel
 from .socket_connection import SocketConnection
@@ -22,6 +23,7 @@ __all__ = [
     "NETCONFConnection",
     "RawL2SocketConnection",
     "RawL3SocketConnection",
+    "RawL4SocketConnection",
     "SerialConnection",
     "SerialConnectionLowLevel",
     "SocketConnection",

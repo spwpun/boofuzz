@@ -16,6 +16,7 @@ from .connections import (
     NETCONFConnection,
     RawL2SocketConnection,
     RawL3SocketConnection,
+    RawL4SocketConnection,
     SerialConnection,
     SerialConnectionLowLevel,
     SocketConnection,
@@ -121,6 +122,7 @@ __all__ = [
     "RandomData",
     "RawL2SocketConnection",
     "RawL3SocketConnection",
+    "RawL4SocketConnection",
     "Repeat",
     "Repeater",
     "Request",
@@ -196,7 +198,7 @@ __all__ = [
     "s_rrrepeat",
 ]
 
-__version__ = "0.4.1"
+__version__ = "spwpun-1.0"
 
 
 # REQUEST MANAGEMENT

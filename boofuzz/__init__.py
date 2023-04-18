@@ -5,7 +5,7 @@ from requests import request
 
 
 from . import blocks, exception, legos, primitives
-from .blocks import Aligned, Block, Checksum, Repeat, Request, REQUESTS, Size, RRRepeat
+from .blocks import Aligned, Block, Checksum, Repeat, Request, REQUESTS, Size, RRRepeat, TLV
 from .cli import main_helper
 from .connections import (
     BaseSocketConnection,
@@ -196,9 +196,11 @@ __all__ = [
     "s_single_bit",
     "RRRepeat",
     "s_rrrepeat",
+    "TLV",
+    "s_tlv",
 ]
 
-__version__ = "spwpun-1.0"
+__version__ = "0.4.1"
 
 
 # REQUEST MANAGEMENT
@@ -1035,6 +1037,25 @@ def s_bytes(value=b"", size=None, padding=b"\x00", fuzzable=True, max_len=None, 
     blocks.CURRENT.push(
         Bytes(name=name, default_value=value, size=size, padding=padding, max_len=max_len, fuzzable=fuzzable, field_type=field_type)
     )
+
+def s_tlv(typev, length, value, fuzzable=True, name=None):
+    """
+    Define a type that is a sequence of type-length-value.
+
+    @type  type:       int or byte
+    @param type:       Value of type
+    @type  length:     int
+    @param length:     Value of length
+    @type  value:      int, byte or string
+    @param value:      Value of value
+    @type  fuzzable:   bool
+    @param fuzzable:   (Optional, def=True) Enable/disable fuzzing of this primitive
+    @type  name:       str
+    @param name:       (Optional, def=None) Specifying a name gives you direct access to a primitive
+    """
+
+    tlv = TLV(typev, length, value, fuzzable, name)
+    blocks.CURRENT.push(tlv)
 
 
 def s_word(

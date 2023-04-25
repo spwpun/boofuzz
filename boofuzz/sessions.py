@@ -461,6 +461,7 @@ class Session(pgraph.Graph):
         target=None,
         web_address=constants.DEFAULT_WEB_UI_ADDRESS,
         db_filename=None,
+        log_fuzz_testcase=False,
     ):
         self._ignore_connection_reset = ignore_connection_reset
         self._ignore_connection_aborted = ignore_connection_aborted
@@ -507,6 +508,10 @@ class Session(pgraph.Graph):
             db_filename=self._db_filename, num_log_cases=fuzz_db_keep_only_n_pass_cases
         )
 
+        self.log_fuzz_testcase = log_fuzz_testcase
+        if self.log_fuzz_testcase:
+            self.log_fuzz_testcase_cnt = 0
+        
         self._crash_filename = "boofuzz-crash-bin-{0}".format(self._run_id)
 
         self._fuzz_data_logger = fuzz_logger.FuzzLogger(fuzz_loggers=[self._db_logger] + fuzz_loggers)
@@ -1187,6 +1192,13 @@ class Session(pgraph.Graph):
 
         try:  # send
             self.targets[0].send(data)
+            if self.log_fuzz_testcase:
+                if not os.path.exists('./testcases/' + self.fuzz_node.qualified_name):
+                    os.mkdir('./testcases/' + self.fuzz_node.qualified_name)
+                with open('./testcases/'+ self.fuzz_node.qualified_name + '/testcase_'+ str(self.log_fuzz_testcase_cnt), 'wb') as f:
+                    f.write(data)
+                self.log_fuzz_testcase_cnt += 1
+                f.close()
             self.last_send = data
         except exception.BoofuzzTargetConnectionReset:
             if self._ignore_connection_issues_when_sending_fuzz_data:

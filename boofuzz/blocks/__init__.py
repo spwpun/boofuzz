@@ -8,8 +8,9 @@ from .request import Request
 from .size import Size
 from .rrrepeat import RRRepeat
 from .tlv import TLV
+from .asn1 import ASN1
 
-__all__ = ["Block", "Checksum", "Repeat", "Request", "Size", "REQUESTS", "Aligned", "RRRepeat", "TLV"]
+__all__ = ["Block", "Checksum", "Repeat", "Request", "Size", "REQUESTS", "Aligned", "RRRepeat", "TLV", "ASN1"]
 
 REQUESTS = {}
 CURRENT = None

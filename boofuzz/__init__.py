@@ -5,7 +5,7 @@ from requests import request
 
 
 from . import blocks, exception, legos, primitives
-from .blocks import Aligned, Block, Checksum, Repeat, Request, REQUESTS, Size, RRRepeat, TLV
+from .blocks import Aligned, Block, Checksum, Repeat, Request, REQUESTS, Size, RRRepeat, TLV, ASN1
 from .cli import main_helper
 from .connections import (
     BaseSocketConnection,
@@ -198,6 +198,8 @@ __all__ = [
     "s_rrrepeat",
     "TLV",
     "s_tlv",
+    "ASN1",
+    "s_asn1",
 ]
 
 __version__ = "0.4.1"
@@ -1056,6 +1058,19 @@ def s_tlv(typev, length, value, fuzzable=True, name=None):
 
     tlv = TLV(typev, length, value, fuzzable, name)
     blocks.CURRENT.push(tlv)
+
+def s_asn1(name, asn1_type, value_block_name, fuzzable=False, parent=None):
+    """
+    Define a block that is an ASN1 type.
+    @name: current block name
+    @asn1_type: ASN1 type
+    @value_block_name: block name of value
+    @fuzzable: enable fuzzing
+    @parent: parent block, the top block's parent is None
+    """
+    
+    asn1 = ASN1(name, asn1_type, value_block_name, fuzzable, parent)
+    blocks.CURRENT.push(asn1)
 
 
 def s_word(

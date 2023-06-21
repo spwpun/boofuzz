@@ -1059,17 +1059,16 @@ def s_tlv(typev, length, value, fuzzable=True, name=None):
     tlv = TLV(typev, length, value, fuzzable, name)
     blocks.CURRENT.push(tlv)
 
-def s_asn1(name, asn1_type, value_block_name, fuzzable=False, parent=None):
+def s_asn1(name, asn1_type, inner_value, fuzzable=False):
     """
     Define a block that is an ASN1 type.
     @name: current block name
     @asn1_type: ASN1 type
-    @value_block_name: block name of value
+    @inner_value: inner value of ASN1 block
     @fuzzable: enable fuzzing
-    @parent: parent block, the top block's parent is None
     """
     
-    asn1 = ASN1(name, asn1_type, value_block_name, fuzzable, parent)
+    asn1 = ASN1(name, asn1_type, inner_value, fuzzable)
     blocks.CURRENT.push(asn1)
 
 
